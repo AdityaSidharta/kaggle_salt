@@ -36,7 +36,7 @@ class ImageLoader():
             msk_array = resize(msk_array, (n_h, n_v, n_c), mode='constant', preserve_range=True)
             X_train[idx, :, :, :] = img_array
             Y_train[idx, :, :, :] = msk_array
-            label_train.append(image_name)
+            label_train.append(image_name.split('.')[0])
         return X_train, Y_train, label_train
 
     def load_test_image(self, test_path):
@@ -47,7 +47,7 @@ class ImageLoader():
             img_array = img_to_array(img)
             img_array = resize(img_array, (n_h, n_v, n_c), mode='constant', preserve_range=True)
             X_test[idx, :, :, :] = img_array
-            label_test.append(image_name)
+            label_test.append(image_name.split('.')[0])
         return X_test, label_test
 
     def get_X_train(self):

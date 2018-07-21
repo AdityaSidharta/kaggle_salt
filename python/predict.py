@@ -1,4 +1,7 @@
 import numpy as np
+import pandas as pd
+
+from tqdm import tqdm
 from python.config import ori_n_c, ori_n_v, ori_n_h, n_test
 
 def threshold_prediction(Y_pred, threshold):
@@ -47,6 +50,12 @@ def generate_dict_pred(Y_pred, label_pred, threshold):
     assert len(label_pred) == n_test
     Y_pred_thres = threshold_prediction(Y_pred, threshold)
     dict_pred = {}
-    for idx in range(n_test):
+    for idx in tqdm(range(n_test)):
         dict_pred[label_pred[idx]] = RLenc(Y_pred_thres[idx, :, :, :])
     return dict_pred
+
+def generate_submission(dict_pred, output_path):
+    sub = pd.DataFrame.from_dict(dict_pred, orient='index')
+    sub.index.names = ['id']
+    sub.columns = ['rle_mask']
+    sub.to_csv(output_path)
