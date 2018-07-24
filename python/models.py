@@ -3,7 +3,7 @@ from keras.layers import BatchNormalization, Dropout, Activation
 from python.metrics import mean_iou
 from python.models_utils import identity_block, conv_block
 from keras.models import Model
-from python.optim import adam
+from python.optim import adam, momentum
 from python.config import n_v, n_h
 from python.losses import dice_coef_loss
 
