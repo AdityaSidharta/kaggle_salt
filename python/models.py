@@ -60,11 +60,11 @@ def U_NET_DEPTH_CLASSIFIER():
 
     p4_flat = Flatten()(p4)
     p4_feat = concatenate([p4_flat, input_features])
-    classifier_output = dense_block_bn_dp(p4_feat, [32, 1], dropout = 0.25)
+    classifier_output = dense_block_bn_dp(p4_feat, [32, 1], dropout=0.25)
 
     f_repeat = RepeatVector(8 * 8)(input_features)
     f_conv = Reshape((8, 8, 1))(f_repeat)
-    p4_concat = concatenate([p4, f_conv], axis = -1)
+    p4_concat = concatenate([p4, f_conv], axis=-1)
 
     c5 = conv_block_bn_dp(p4_concat, 128, 0.25, is_maxpool = False)
     c6 = trans_conv_block_bn_dp(c5, c4, 64, 0.25)

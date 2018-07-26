@@ -7,6 +7,7 @@ from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 import pandas as pd
 from tqdm import tqdm
+from python.config import test_path
 
 def rle_decode(rle_mask):
     '''
@@ -50,3 +51,12 @@ def crf(original_image, mask_img):
     MAP = np.argmax(Q, axis=0)
     return MAP.reshape((original_image.shape[0], original_image.shape[1]))
 
+def postprocessing(submission_path, new_submission_path):
+    df = pd.read_csv(submission_path)
+    for i in tqdm(range(df.shape[0])):
+        if str(df.loc[i, 'rle_mask']) != str(np.nan):
+            decoded_mask = rle_decode(df.loc[i, 'rle_mask'])
+            orig_img = imread(test_path + df.loc[i, 'id'] + '.png')
+            crf_output = crf(orig_img, decoded_mask)
+            df.loc[i, 'rle_mask'] = rle_encode(crf_output)
+    df.to_csv(new_submission_path, index=False)

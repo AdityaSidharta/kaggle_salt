@@ -126,14 +126,21 @@ class ImageLoader:
     def get_label_test(self):
         return self.label_test
 
-    #TODO might still be buggy. The Y Train is not done properly
+    def get_dihedral_transform(self):
+        rotation_angle = np.random.choice([0., 90., 180., 270.])
+        is_flip_horizontal = np.random.choice([True, False])
+        return {
+            'theta': rotation_angle,
+            'flip_horizontal': is_flip_horizontal
+        }
+
     def randomize_train(self, X_train, Y_train):
         random_X_train = np.zeros(X_train.shape)
         random_Y_train = np.zeros(Y_train.shape)
         n_train = X_train.shape[0]
         n_h, n_v = X_train.shape[1], X_train.shape[2]
         for idx in range(n_train):
-            random_transform = self.train_gen.get_random_transform((n_h, n_v))
+            random_transform = self.get_dihedral_transform()
             random_X_train[idx, :, :, :] = self.train_gen.apply_transform(X_train[idx, :, :, :], random_transform)
             random_Y_train[idx, :, :, :] = self.train_gen.apply_transform(Y_train[idx, :, :, :], random_transform)
         return random_X_train, random_Y_train
