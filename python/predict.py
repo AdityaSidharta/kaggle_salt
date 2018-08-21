@@ -3,6 +3,7 @@ import pandas as pd
 
 from tqdm import tqdm
 from python.config import ori_n_c, ori_n_v, ori_n_h, n_test
+from keras.preprocessing.image import ImageDataGenerator
 
 def threshold_prediction(Y_pred, threshold):
     return np.round((Y_pred > threshold).astype(np.uint8))
@@ -45,6 +46,25 @@ def RLenc(img, order='F', format=True):
     else:
         return runs
 
+def TTA_prediction(model, X_pred):
+    datagen = ImageDataGenerator()
+    assert X_pred.shape == (n_test, ori_n_h, ori_n_v, ori_n_c)
+    Y_pred = np.zeros((n_test, ori_n_h, ori_n_v, ori_n_c))
+    for idx in tqdm(range(n_test)):
+        X_pred_indiv = X_pred[idx, :, :, :]
+        Y_pred_indiv = np.zeros((8, ori_n_h, ori_n_v, ori_n_c))
+        for theta in [0., 90., 180., 270.]:
+            for is_flip_horizontal in [True, False]:
+                img = datagen.apply_transform(X_pred_indiv,
+                {'theta': theta,
+                 'flip_horizontal': is_flip_horizontal})
+                mask = model.predict(img, verbose = 1)
+                Y_pred_indiv[idx, :, :, :] = datagen.apply_transform(mask,
+                {'theta': np.abs(360. - theta),
+                 'flip_horizontal': is_flip_horizontal})
+        Y_pred[idx, :, :, :] = np.mean(Y_pred_indiv, axis=0)
+    print Y_pred
+
 def generate_dict_pred(Y_pred, label_pred, threshold):
     assert Y_pred.shape == (n_test, ori_n_h, ori_n_v, ori_n_c)
     assert len(label_pred) == n_test
@@ -59,3 +79,4 @@ def generate_submission(dict_pred, output_path):
     sub.index.names = ['id']
     sub.columns = ['rle_mask']
     sub.to_csv(output_path)
+
